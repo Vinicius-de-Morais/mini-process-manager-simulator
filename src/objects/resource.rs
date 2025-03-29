@@ -1,6 +1,7 @@
 
+#[derive(Debug, Clone)]
 pub struct Resource {
-    name: String,
-    Path: String,
-    size: u64,
+    pub name: String,
+    pub path: String,
+    pub size: u64,
 }
