@@ -10,7 +10,7 @@ use super::resource::Resource;
 pub struct ThreadPool {
     workers: Vec<Worker>,
     sender: Option<mpsc::Sender<Job>>,
-    resource_manager: Arc<Mutex<ResourceManager>>
+    pub resource_manager: Arc<Mutex<ResourceManager>>
 }
 
 type Job = Box<dyn FnOnce() + Send + 'static>;

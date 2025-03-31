@@ -47,4 +47,47 @@ impl ResourceManager {
         self.thread_map.get(&thread_id)
     }
 
+    pub fn detect_deadlock(&self) -> bool {
+        let mut visited = HashMap::new();
+        let mut stack = HashMap::new();
+
+        for resource_tree in &self.resources_tree {
+            if self.has_cycle(resource_tree, &mut visited, &mut stack) {
+                return true;
+            }
+        }
+        
+        false 
+    }
+
+    /// Helper function to perform DFS and detect cycles.
+    fn has_cycle(
+        &self,
+        node: &ResourceTree,
+        visited: &mut HashMap<ThreadId, bool>,
+        stack: &mut HashMap<ThreadId, bool>,
+    ) -> bool {
+        let thread_id = node.get_thread_id();
+
+        if stack.get(&thread_id).copied().unwrap_or(false) {
+            return true; // Cycle detected
+        }
+
+        if visited.get(&thread_id).copied().unwrap_or(false) {
+            return false; // Already processed, no cycle
+        }
+
+        visited.insert(thread_id, true);
+        stack.insert(thread_id, true);
+
+        for child in node.get_children() {
+            if self.has_cycle(child, visited, stack) {
+                return true;
+            }
+        }
+
+        stack.insert(thread_id, false);
+        false
+    }
+
 }
