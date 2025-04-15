@@ -1,15 +1,16 @@
-use std::{collections::HashMap, thread::ThreadId};
+use std::{collections::HashMap, sync::Arc, thread::ThreadId};
 
 use super::resource::Resource;
 
 pub struct ResourceTree{
-    resource: Resource,
+    resource: Arc<Resource>,
     root: Node,
     children: Vec<ResourceTree>,
+    waiting_threads: Vec<ThreadId>,
 }
 
 impl ResourceTree {
-    pub fn new(resource: Resource, thread_id: ThreadId) -> ResourceTree {
+    pub fn new(resource: Arc<Resource>, thread_id: ThreadId) -> ResourceTree {
         ResourceTree {
             resource,
             root: Node {
@@ -17,6 +18,7 @@ impl ResourceTree {
                 children: Vec::new(),
             },
             children: Vec::new(),
+            waiting_threads: Vec::new(),
         }
     }
 
@@ -47,6 +49,18 @@ impl ResourceTree {
         self.root.children.iter().map(|child| child.thread_id).collect()
     }
 
+    pub fn add_waiting_thread(&mut self, thread_id: ThreadId) {
+        // Adiciona a thread à lista de threads aguardando este recurso
+        self.waiting_threads.push(thread_id);
+    }
+
+    pub fn get_waiting_threads(&self) -> Option<&Vec<ThreadId>> {
+        if self.waiting_threads.is_empty() {
+            None
+        } else {
+            Some(&self.waiting_threads)
+        }
+    }
 }
 
 pub struct Node {
